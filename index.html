@@ -114,12 +114,21 @@
                 <small>Eu sou rosa:</small><br>
                 <span>-10.684893, -37.424748</span>
             </div>
-            <p>Recarregue para atualizar sua posição</p>.<br>Distância atual:</p>
+            <p>Recarregue para atualizar sua posição.<br>Distância atual:</p>
             <h2 id="dist-1">Calculando...</h2>
             <div class="icon">🧭</div>
         </div>
 
-        <!-- TELA 2: Chegou na Casa / Instrução da Praça -->
+        <!-- TELA 1.5: Chegou na Casa / Senha da Casa -->
+        <div id="screen-house-password" class="screen">
+            <h1>Você chegou! 🏠</h1>
+            <p>Você encontrou o primeiro local. Digite o número da casa para confirmar:</p>
+            <input type="number" id="house-password-input" placeholder="Número da casa">
+            <button onclick="checkHousePassword()">Verificar</button>
+            <p id="wrong-house-password" style="color: #ffeaa7; display: none; margin-top: 10px;">Número incorreto, tente de novo!</p>
+        </div>
+
+        <!-- TELA 2: Acertou a senha da Casa / Instrução da Praça -->
         <div id="screen-2" class="screen">
             <h1>Parabéns mozinho! 🎉</h1>
             <p>Você completou a primeira parte! Mas a aventura não acaba aqui...</p>
@@ -142,12 +151,12 @@
             <div class="icon">🚶‍♀️</div>
         </div>
 
-        <!-- TELA 4: Chegou na Praça / Senha -->
+        <!-- TELA 4: Chegou na Praça / Senha Final -->
         <div id="screen-4" class="screen">
             <h1>Você chegou! ⛪</h1>
             <p>Seu namorado irá lhe dar a próxima instrução.</p>
             <p>Digite abaixo a senha (6 digitos):</p>
-            <input type="number" id="password-input" placeholder="Ex: 010826">
+            <input type="number" id="password-input" placeholder="123455">
             <button onclick="checkPassword()">Desbloquear</button>
             <p id="wrong-password" style="color: #ffeaa7; display: none; margin-top: 10px;">Senha incorreta, tente de novo!</p>
         </div>
@@ -165,15 +174,16 @@
 
     <script>
         // ================= CONFIGURAÇÕES =================
-        const TARGET1_LAT = -8.06439; // Casa
+        const TARGET1_LAT = -8.06439; // Casa (Suas coordenadas de teste)
         const TARGET1_LNG = -34.982311;
-        const TARGET1_RADIUS = 10;      // Margem de erro de 20m para a casa
+        const TARGET1_RADIUS = 10;      // Margem de erro de 10m para a casa
+        const HOUSE_PASSWORD = "123";   // COLOQUE AQUI O NÚMERO DA CASA REAL
 
-        const TARGET2_LAT = -8.06439; // Praça
+        const TARGET2_LAT = -8.06439; // Praça (Suas coordenadas de teste)
         const TARGET2_LNG = -34.982311;
         const TARGET2_RADIUS = 150;     // Incerteza de 150m para cobrir a praça
 
-        const PASSWORD = "010826";      // Senha final
+        const FINAL_PASSWORD = "010826"; // Senha final (aniversário)
         // =================================================
 
         let watchId = null;
@@ -205,7 +215,7 @@
 
                         if (dist1 <= TARGET1_RADIUS) {
                             currentTarget = 0; // Pausa o rastreamento temporariamente
-                            showScreen('screen-2');
+                            showScreen('screen-house-password');
                         }
                     }
                     
@@ -228,14 +238,27 @@
             );
         }
 
+        // Verifica a senha da casa (Etapa 1.5)
+        function checkHousePassword() {
+            const input = document.getElementById('house-password-input').value.trim();
+            if (input === HOUSE_PASSWORD) {
+                document.getElementById('wrong-house-password').style.display = 'none';
+                showScreen('screen-2');
+            } else {
+                document.getElementById('wrong-house-password').style.display = 'block';
+            }
+        }
+
         function goToPraca() {
-            currentTarget = 2;
+            currentTarget = 2; // Volta a rastrear, agora com o alvo 2 (Praça)
             showScreen('screen-3');
         }
 
+        // Verifica a senha final (Etapa 4)
         function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
-            if (input === PASSWORD) {
+            if (input === FINAL_PASSWORD) {
+                document.getElementById('wrong-password').style.display = 'none';
                 showScreen('screen-5');
             } else {
                 document.getElementById('wrong-password').style.display = 'block';

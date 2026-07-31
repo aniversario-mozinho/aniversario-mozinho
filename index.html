@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surpresa do Mozão ❤️</title>
+    <title>Caça ao Tesouro ❤️</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap');
 
@@ -33,9 +33,10 @@
 
         h1 {
             font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            line-height: 1.2;
         }
 
         .screen { display: none; }
@@ -73,6 +74,7 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
             box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            margin-top: 10px;
         }
 
         button:hover {
@@ -80,71 +82,102 @@
             transform: scale(1.05);
         }
 
-        .heart {
+        .icon {
             font-size: 3rem;
-            animation: beat 1s infinite alternate;
+            margin: 10px 0;
+            animation: bounce 2s infinite;
         }
 
-        @keyframes beat {
-            to { transform: scale(1.2); }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
         }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <!-- TELA 1: Dando permissão / Buscando localização -->
-        <div id="screen-loading" class="screen active">
+        <!-- TELA 0: Permissão -->
+        <div id="screen-0" class="screen active">
             <h1>Oie, Mozinho ❤️</h1>
-            <p>Tenho uma surpresa pra você. Mas primeiro, preciso saber onde você está!</p>
-            <button onclick="startTracking()">Permitir Localização</button>
+            <p>Tenho uma surpresa pra você. Mas primeiro, preciso ligar o seu GPS!</p>
+            <button onclick="startTracking()">Começar Aventura</button>
             <p id="error-msg" style="color: #ffeaa7; font-size: 0.9rem; margin-top: 15px;"></p>
         </div>
 
-        <!-- TELA 2: Mostrando as coordenadas e a distância -->
-        <div id="screen-tracking" class="screen">
-            <h1>Siga o seu coração...</h1>
-            <p>Vá até o destino misterioso:</p>
+        <!-- TELA 1: Indo para a Casa -->
+        <div id="screen-1" class="screen">
+            <h1>Bem-vinda à sua caça ao tesouro! 🗺️</h1>
+            <p>Só posso te dar uma única dica. Siga para estas coordenadas:</p>
             <div class="distance-box">
-                <small>Coordenadas Alvo:</small><br>
-                <span id="target-coords-display"></span>
+                <small>Destino 1:</small><br>
+                <span>-10.684893, -37.424748</span>
             </div>
-            <p>Sua distância até a surpresa:</p>
-            <h2 id="distance-display">Calculando...</h2>
-            <div class="heart">🧭</div>
+            <p>O site vai saber quando você chegar.<br>Distância atual:</p>
+            <h2 id="dist-1">Calculando...</h2>
+            <div class="icon">🧭</div>
         </div>
 
-        <!-- TELA 3: Chegou perto! Pedir senha -->
-        <div id="screen-password" class="screen">
-            <h1>Você Chegou! 🎉</h1>
-            <div class="heart">🏠</div>
-            <p>Você encontrou o local. Agora me diga, qual é o número desta casa?</p>
-            <input type="text" id="password-input" placeholder="Digite a senha (número)">
+        <!-- TELA 2: Chegou na Casa / Instrução da Praça -->
+        <div id="screen-2" class="screen">
+            <h1>Parabéns mozinho! 🎉</h1>
+            <p>Você completou a primeira parte! Mas a aventura não acaba aqui...</p>
+            <div class="distance-box">
+                <p>Agora vá para a <b>Praça da Igreja</b>, uma surpresa te espera lá!</p>
+            </div>
+            <button onclick="goToPraca()">Estou a caminho!</button>
+        </div>
+
+        <!-- TELA 3: Indo para a Praça -->
+        <div id="screen-3" class="screen">
+            <h1>Destino: Praça da Igreja ⛪</h1>
+            <p>Continue andando, estou de olho em você...</p>
+            <div class="distance-box">
+                <small>Coordenadas da Praça:</small><br>
+                <span>-10.685497, -37.426434</span>
+            </div>
+            <p>Distância até a praça:</p>
+            <h2 id="dist-2">Calculando...</h2>
+            <div class="icon">🚶‍♀️</div>
+        </div>
+
+        <!-- TELA 4: Chegou na Praça / Senha -->
+        <div id="screen-4" class="screen">
+            <h1>Você chegou! ⛪</h1>
+            <p>Seu namorado irá lhe dar a última dica.</p>
+            <p>Digite abaixo a senha (é um número de 6 dígitos que é o dia do seu aniversário):</p>
+            <input type="number" id="password-input" placeholder="Ex: 010826">
             <button onclick="checkPassword()">Desbloquear</button>
             <p id="wrong-password" style="color: #ffeaa7; display: none; margin-top: 10px;">Senha incorreta, tente de novo!</p>
         </div>
 
-        <!-- TELA 4: Sucesso -->
-        <div id="screen-success" class="screen">
-            <h1>Parabéns mozinho! 🥰</h1>
-            <div class="heart">🎁</div>
+        <!-- TELA 5: Sucesso Final -->
+        <div id="screen-5" class="screen">
+            <h1>Surpresa Final! 🎁</h1>
+            <div class="icon">🥰</div>
             <p style="font-size: 1.2rem; line-height: 1.6; margin-top: 20px;">
-                Você conseguiu o seu presente.<br>
-                Se dirija a mim e eu irei entregá-lo!
+                Agora você receberá seu presente final.<br><br>
+                <b>Abrace forte seu namorado e você irá recebê-lo!</b>
             </p>
         </div>
     </div>
 
     <script>
         // ================= CONFIGURAÇÕES =================
-        const TARGET_LAT = -8.06439;  // Substitua pela latitude da casa
-        const TARGET_LNG = -34.982311; // Substitua pela longitude da casa
-        const TARGET_PASSWORD = "123";   // A senha (número da casa)
-        const RADIUS_METERS = 20;        // Recomendo 20m para evitar falhas do GPS
+        const TARGET1_LAT = -8.06439; // Casa
+        const TARGET1_LNG = -34.982311;
+        const TARGET1_RADIUS = 10;      // Margem de erro de 20m para a casa
+
+        const TARGET2_LAT = -8.06439; // Praça
+        const TARGET2_LNG = -34.982311;
+        const TARGET2_RADIUS = 150;     // Incerteza de 150m para cobrir a praça
+
+        const PASSWORD = "010826";      // Senha final
         // =================================================
 
-        document.getElementById('target-coords-display').innerText = `${TARGET_LAT}, ${TARGET_LNG}`;
         let watchId = null;
+        let currentTarget = 1; // 1 = Rastreando Casa, 2 = Rastreando Praça, 0 = Pausado
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -153,59 +186,72 @@
 
         function startTracking() {
             if (!navigator.geolocation) {
-                document.getElementById('error-msg').innerText = "Seu navegador não suporta GPS. Use o Chrome ou Safari.";
+                document.getElementById('error-msg').innerText = "Seu navegador não suporta GPS.";
                 return;
             }
 
-            document.getElementById('error-msg').innerText = "Buscando localização... Aceite a permissão no topo da tela!";
+            document.getElementById('error-msg').innerText = "Aceite a permissão de localização no topo da tela!";
 
-            // Começa a observar a posição continuamente
             watchId = navigator.geolocation.watchPosition(
                 position => {
-                    showScreen('screen-tracking');
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    
-                    const distance = getDistanceFromLatLonInMeters(userLat, userLng, TARGET_LAT, TARGET_LNG);
-                    document.getElementById('distance-display').innerText = Math.round(distance) + " metros";
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
 
-                    // Se chegou no raio definido
-                    if (distance <= RADIUS_METERS) {
-                        navigator.geolocation.clearWatch(watchId); // Para de usar o GPS
-                        showScreen('screen-password');
+                    // Lógica da Etapa 1 (Casa)
+                    if (currentTarget === 1) {
+                        showScreen('screen-1');
+                        const dist1 = getDistance(lat, lng, TARGET1_LAT, TARGET1_LNG);
+                        document.getElementById('dist-1').innerText = Math.round(dist1) + " metros";
+
+                        if (dist1 <= TARGET1_RADIUS) {
+                            currentTarget = 0; // Pausa o rastreamento temporariamente
+                            showScreen('screen-2');
+                        }
+                    }
+                    
+                    // Lógica da Etapa 2 (Praça)
+                    else if (currentTarget === 2) {
+                        const dist2 = getDistance(lat, lng, TARGET2_LAT, TARGET2_LNG);
+                        document.getElementById('dist-2').innerText = Math.round(dist2) + " metros";
+
+                        if (dist2 <= TARGET2_RADIUS) {
+                            currentTarget = 0; // Finaliza o uso do GPS
+                            navigator.geolocation.clearWatch(watchId); 
+                            showScreen('screen-4');
+                        }
                     }
                 },
                 error => {
-                    document.getElementById('error-msg').innerText = "Erro ao pegar GPS. Verifique se o GPS está ligado e se deu permissão!";
+                    document.getElementById('error-msg').innerText = "Erro ao pegar GPS. Ligue a localização do celular!";
                 },
-                { enableHighAccuracy: true, maximumAge: 0 } // Força o uso do GPS real
+                { enableHighAccuracy: true, maximumAge: 0 }
             );
+        }
+
+        function goToPraca() {
+            currentTarget = 2;
+            showScreen('screen-3');
         }
 
         function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
-            if (input === TARGET_PASSWORD) {
-                showScreen('screen-success');
+            if (input === PASSWORD) {
+                showScreen('screen-5');
             } else {
                 document.getElementById('wrong-password').style.display = 'block';
             }
         }
 
-        // Fórmula matemática (Haversine) para calcular distância em metros entre duas coordenadas
-        function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Raio da terra em metros
-            const dLat = deg2rad(lat2 - lat1);
-            const dLon = deg2rad(lon2 - lon1); 
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2); 
+        // Cálculo Matemático de Distância
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; 
+            const dLat = (lat2 - lat1) * (Math.PI/180);
+            const dLon = (lon2 - lon1) * (Math.PI/180); 
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * 
+                      Math.sin(dLon/2) * Math.sin(dLon/2); 
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
             return R * c;
-        }
-
-        function deg2rad(deg) {
-            return deg * (Math.PI/180);
         }
     </script>
 </body>

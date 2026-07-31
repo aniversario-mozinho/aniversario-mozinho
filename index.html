@@ -114,7 +114,7 @@
                 <small>Eu sou rosa:</small><br>
                 <span>-10.684893, -37.424748</span>
             </div>
-            <p>Recarregue para atualizar sua posição.<br>Distância atual:</p>
+            <p>Acompanhe a distância abaixo em tempo real:</p>
             <h2 id="dist-1">Calculando...</h2>
             <div class="icon">🧭</div>
         </div>
@@ -174,13 +174,13 @@
 
     <script>
         // ================= CONFIGURAÇÕES =================
-        const TARGET1_LAT = -8.06439; // Casa (Suas coordenadas de teste)
-        const TARGET1_LNG = -34.982311;
-        const TARGET1_RADIUS = 10;      // Margem de erro de 10m para a casa
-        const HOUSE_PASSWORD = "123";   // COLOQUE AQUI O NÚMERO DA CASA REAL
+        const TARGET1_LAT = -10.684893; // Casa
+        const TARGET1_LNG = -37.424748;
+        const TARGET1_RADIUS = 10;      // Raio de 10m para a casa
+        const HOUSE_PASSWORD = "123";   // Número da casa
 
-        const TARGET2_LAT = -8.06439; // Praça (Suas coordenadas de teste)
-        const TARGET2_LNG = -34.982311;
+        const TARGET2_LAT = -10.685497; // Praça
+        const TARGET2_LNG = -37.426434;
         const TARGET2_RADIUS = 150;     // Incerteza de 150m para cobrir a praça
 
         const FINAL_PASSWORD = "010826"; // Senha final (aniversário)
@@ -188,6 +188,7 @@
 
         let watchId = null;
         let currentTarget = 1; // 1 = Rastreando Casa, 2 = Rastreando Praça, 0 = Pausado
+        let lastPosition = null; // Guarda a última posição do GPS
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -202,40 +203,48 @@
 
             document.getElementById('error-msg').innerText = "Aceite a permissão de localização no topo da tela!";
 
+            // 1. Fica escutando o GPS em segundo plano e guarda a última posição
             watchId = navigator.geolocation.watchPosition(
                 position => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-
-                    // Lógica da Etapa 1 (Casa)
-                    if (currentTarget === 1) {
-                        showScreen('screen-1');
-                        const dist1 = getDistance(lat, lng, TARGET1_LAT, TARGET1_LNG);
-                        document.getElementById('dist-1').innerText = Math.round(dist1) + " metros";
-
-                        if (dist1 <= TARGET1_RADIUS) {
-                            currentTarget = 0; // Pausa o rastreamento temporariamente
-                            showScreen('screen-house-password');
-                        }
-                    }
-                    
-                    // Lógica da Etapa 2 (Praça)
-                    else if (currentTarget === 2) {
-                        const dist2 = getDistance(lat, lng, TARGET2_LAT, TARGET2_LNG);
-                        document.getElementById('dist-2').innerText = Math.round(dist2) + " metros";
-
-                        if (dist2 <= TARGET2_RADIUS) {
-                            currentTarget = 0; // Finaliza o uso do GPS
-                            navigator.geolocation.clearWatch(watchId); 
-                            showScreen('screen-4');
-                        }
-                    }
+                    lastPosition = position;
                 },
                 error => {
                     document.getElementById('error-msg').innerText = "Erro ao pegar GPS. Ligue a localização do celular!";
                 },
                 { enableHighAccuracy: true, maximumAge: 0 }
             );
+
+            // 2. Atualiza a tela e calcula a distância a cada 1 segundo (1000ms)
+            setInterval(() => {
+                if (!lastPosition || currentTarget === 0) return;
+
+                const lat = lastPosition.coords.latitude;
+                const lng = lastPosition.coords.longitude;
+
+                // Lógica da Etapa 1 (Casa)
+                if (currentTarget === 1) {
+                    showScreen('screen-1');
+                    const dist1 = getDistance(lat, lng, TARGET1_LAT, TARGET1_LNG);
+                    document.getElementById('dist-1').innerText = Math.round(dist1) + " metros";
+
+                    if (dist1 <= TARGET1_RADIUS) {
+                        currentTarget = 0; // Pausa o rastreamento temporariamente
+                        showScreen('screen-house-password');
+                    }
+                }
+                
+                // Lógica da Etapa 2 (Praça)
+                else if (currentTarget === 2) {
+                    const dist2 = getDistance(lat, lng, TARGET2_LAT, TARGET2_LNG);
+                    document.getElementById('dist-2').innerText = Math.round(dist2) + " metros";
+
+                    if (dist2 <= TARGET2_RADIUS) {
+                        currentTarget = 0; // Finaliza o rastreamento
+                        if (watchId) navigator.geolocation.clearWatch(watchId); 
+                        showScreen('screen-4');
+                    }
+                }
+            }, 1000);
         }
 
         // Verifica a senha da casa (Etapa 1.5)
@@ -265,7 +274,7 @@
             }
         }
 
-        // Cálculo Matemático de Distância
+        // Cálculo Matemático de Distância (Haversine)
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000; 
             const dLat = (lat2 - lat1) * (Math.PI/180);

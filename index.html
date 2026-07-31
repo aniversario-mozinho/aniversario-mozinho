@@ -98,8 +98,18 @@
 <body>
 
     <div class="card">
+        <!-- TELA INICIAL: Mistério e Senha de Início -->
+        <div id="screen-intro" class="screen active">
+            <h1>Algo especial te aguarda... ✨</h1>
+            <p>Mas tudo tem a sua hora certa. Você só poderá iniciar esta jornada quando eu te der a chave.</p>
+            <p>Digite a chave de acesso abaixo para começar:</p>
+            <input type="number" id="start-password-input" placeholder="Chave de acesso">
+            <button onclick="checkStartPassword()">Desvendar</button>
+            <p id="wrong-start-password" style="color: #ffeaa7; display: none; margin-top: 10px;">Chave incorreta. Ainda não é a hora!</p>
+        </div>
+
         <!-- TELA 0: Permissão -->
-        <div id="screen-0" class="screen active">
+        <div id="screen-0" class="screen">
             <h1>Oie, Mozinho ❤️</h1>
             <p>Tenho uma surpresa pra você. Mas primeiro, preciso ligar o seu GPS!</p>
             <button onclick="startTracking()">Começar Aventura</button>
@@ -174,6 +184,8 @@
 
     <script>
         // ================= CONFIGURAÇÕES =================
+        const START_PASSWORD = "20";    // Senha inicial para liberar o jogo
+
         const TARGET1_LAT = -10.684893; // Casa
         const TARGET1_LNG = -37.424748;
         const TARGET1_RADIUS = 10;      // Raio de 10m para a casa
@@ -193,6 +205,17 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+        }
+
+        // Verifica a senha inicial (Tela Mistério)
+        function checkStartPassword() {
+            const input = document.getElementById('start-password-input').value.trim();
+            if (input === START_PASSWORD) {
+                document.getElementById('wrong-start-password').style.display = 'none';
+                showScreen('screen-0'); // Libera a tela de GPS
+            } else {
+                document.getElementById('wrong-start-password').style.display = 'block';
+            }
         }
 
         function startTracking() {
